@@ -9,7 +9,7 @@ on:
   
 env:
   dotnet_version: '6.x.x'
-  Azure_Resource_GroupName: 'rg-LearningDictionary'
+  Azure_Resource_GroupName: 'rg-LearningDictionary5'
   Azure_Resource_GroupLocation: 'eastus2'
   dotnet_buildConfiguration: 'Release'
   AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
@@ -60,14 +60,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: List To-be-Purged soft-deleted instance of APIM
-      #if: contains(github.event_name, 'push')
-      uses: Azure/CLI@v1
-      continue-on-error: true
-      with:
-        inlineScript: |
-          az rest --method get --header "Accept=application/json" -u 'https://management.azure.com/subscriptions/${{ env.SUBSCRIPTION_ID }}/providers/Microsoft.ApiManagement/deletedservices?api-version=2022-04-01-preview'
-
     # - name: Set short git commit SHA
     #   id: vars
     #   run: |
@@ -87,28 +79,6 @@ jobs:
         template: ./IaC/main.bicep
         parameters: ./IaC/main.params.json Deployed_Environment='Dev' 
         failOnStdErr: false
-
-    # Update/Set OpenAPIKey password in Key Vault
-    - name: 'Update Key Vault secret for OpenAI_APIKEY'
-      id: GetKVACRValues
-      uses: Azure/CLI@v1
-      continue-on-error: true
-      with:
-        inlineScript: |
-          az config set extension.use_dynamic_install=yes_without_prompt
-          result=$(az keyvault secret set \
-                      --name "OpenAIAPIKey" \
-                      --vault-name "${{ steps.Infra.outputs.out_keyvaultName }}" \
-                      --value ${{ secrets.OpenAI_APIKEY }})
-
-    # Refresh the secret from Key Vault immediately for the Named Value specified
-    # Otherwise, there will be a much longer delay on Azure.
-    - name: Refresh Key Vault secret in APIM for OpenAI_APIKEY named value
-      uses: Azure/CLI@v1
-      continue-on-error: true
-      with:
-        inlineScript: |
-          az rest --method post --uri 'https://management.azure.com/subscriptions/${{ env.SUBSCRIPTION_ID }}/resourceGroups/${{ env.Azure_Resource_GroupName }}/providers/Microsoft.ApiManagement/service/${{ steps.Infra.outputs.out_apiServiceName }}/namedValues/OpenAIAPIKey/refreshSecret?api-version=2022-04-01-preview'
 
     - name: DEBUG ONLY Display Output Variables
       run: |
@@ -166,7 +136,7 @@ jobs:
           dotnet build LearningDictionary5.Web/LearningDictionary5.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} --no-restore
           dotnet publish LearningDictionary5.Web/LearningDictionary5.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './web'
           dotnet build LearningDictionary5.FuncApp/LearningDictionary5.FuncApp.csproj --configuration ${{ env.dotnet_buildConfiguration }} --no-restore
-          dotnet publish LearningDictionary5.FuncApp/LearningDictionary5.FuncApp.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './func'
+          dotnet publish LearningDictionary5.FuncApp/LearningDictionary5.FuncApp.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './functionapp'
 
       ###########################################
       # Upload Artifacts
@@ -177,6 +147,13 @@ jobs:
         with:
           name: LearningDictionary5.Web
           path: ${{ github.workspace }}/web
+
+      - name: Upload Build Artifacts-FuncApp
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: LearningDictionary5.FuncApp
+          path: ${{ github.workspace }}/functionapp
 
   ################################################################
   # Stage: Deploy to Web App
@@ -227,7 +204,23 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
           app-name: ${{ needs.deploy_infrastructure.outputs.output_webSiteName }}
-          package: './ALearningDictionary5.Web'
+          package: './LearningDictionary5.Web'
+
+
+    - name: Download Build Artifacts-Function Application
+      uses: actions/download-artifact@v2
+      continue-on-error: false
+      with:
+        name: LearningDictionary5.FuncApp
+        path: ${{ github.workspace }}/LearningDictionary5.FuncApp
+
+    # Deploy Function Application
+    - name: 'Deploy Function Application'
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ needs.deploy_infrastructure.outputs.output_functionAppName }}
+        slot-name: 'production'
+        package: './LearningDictionary5.FuncApp'
 
     # Lock Resource Group
     - name: Ensure Resource Group is Locked
