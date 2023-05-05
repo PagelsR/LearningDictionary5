@@ -35,7 +35,7 @@ var defaultTags = {
 }
 
 // KeyVault Secret Names
-param kvValue_ConnectionStringName string = 'ConnectionStringsMercuryHealthWebContext'
+param kvValue_ConnectionStringName string = 'LearningDictionaryDBConnectionString'
 param kvValue_AzureWebJobsStorageName string = 'AzureWebJobsStorage'
 param kvValue_WebsiteContentAzureFileConnectionString string = 'WebsiteContentAzureFileConnectionString'
 
@@ -108,7 +108,8 @@ module functionappmod './main-funcapp.bicep' = {
   ]
 }
 
-param AzObjectIdPagels string = '197b8610-80f8-4317-b9c4-06e5b3246e87'
+// pagelsr@live.com
+param AzObjectIdPagels string = '9408988e-989e-491b-b109-4c83d479f1a1'
 
 // Application Id of Service Principal "8f808196420a_ServicePrincipal_FullAccess"
 param ADOServiceprincipalObjectId string = '228be5d8-42dd-4662-a9e8-45749b5af44d'

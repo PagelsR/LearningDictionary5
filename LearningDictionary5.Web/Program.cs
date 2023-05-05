@@ -24,22 +24,12 @@ builder.Host.ConfigureAppConfiguration(builder =>
         services.AddControllersWithViews();
     });
 
-//builder.Services.Configure<ForwardedHeadersOptions>(options =>
-//{
-//   
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // Add DBContext services to the container
 builder.Services.AddDbContext<MyDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString(connectionString)));
-
-
-//// Add DBContext services to the container
-//builder.Services.AddDbContext<MyDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("connectionString")));
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LearningDictionaryDBConnectionString")));
 
 var app = builder.Build();
 

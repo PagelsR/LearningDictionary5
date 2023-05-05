@@ -1,0 +1,57 @@
+﻿@model IEnumerable<LearningDictionary5.Web.Models.Dictionary>
+
+@{
+    ViewData["Title"] = "Dictionaries";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-page="Create">Create New Dictionary</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Primary Language</th>
+            <th>Translation Language</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dictionary in Model)
+        {
+            <tr>
+                <td>@dictionary.PrimaryLanguage</td>
+                <td>@dictionary.SecondaryLanguage</td>
+                <td>@dictionary.Words</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@dictionary.Id">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@dictionary.Id">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@dictionary.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Word</th>
+            <th>Translation</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var word in Model)
+        {
+                <tr>
+                <td>@word.Words</td>
+@*                <td>@word.Words.PrimaryWord</td>
+                <td>@word.Words.SecondaryWord</td>*@
+                </tr>
+        }
+    </tbody>
+</table>
+
