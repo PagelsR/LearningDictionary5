@@ -116,9 +116,6 @@ jobs:
          echo 'output_keyvaultName: ${{ steps.Infra.outputs.out_keyvaultName }}'
          echo 'output_appInsightsName: ${{ steps.Infra.outputs.out_appInsightsName }}'
          echo 'output_functionAppName: ${{ steps.Infra.outputs.out_functionAppName }}'
-         echo 'output_apiServiceName: ${{ steps.Infra.outputs.out_apiServiceName }}'
-         echo 'output_apimSubscriptionKey: ${{ steps.Infra.outputs.out_apimSubscriptionKey }}'
-         echo 'output_OpenAIKeyValue: ${{ steps.Infra.outputs.out_OpenAIKeyValue }}'
          echo 'output_appInsightsApplicationId: = ${{ steps.Infra.outputs.out_appInsightsApplicationId }}'
          echo 'output_appInsightsAPIApplicationId: = ${{ steps.Infra.outputs.out_appInsightsAPIApplicationId }}'
 
@@ -166,8 +163,10 @@ jobs:
       - name: dotnet build unit test and publish
         run: |
           dotnet restore
-          dotnet build AzureOpenAIDemo.Web/AzureOpenAIDemo.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} --no-restore
-          dotnet publish AzureOpenAIDemo.Web/AzureOpenAIDemo.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './web'
+          dotnet build LearningDictionary5.Web/LearningDictionary5.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} --no-restore
+          dotnet publish LearningDictionary5.Web/LearningDictionary5.Web.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './web'
+          dotnet build LearningDictionary5.FuncApp/LearningDictionary5.FuncApp.csproj --configuration ${{ env.dotnet_buildConfiguration }} --no-restore
+          dotnet publish LearningDictionary5.FuncApp/LearningDictionary5.FuncApp.csproj --configuration ${{ env.dotnet_buildConfiguration }} -o './func'
 
       ###########################################
       # Upload Artifacts
@@ -176,7 +175,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v2
         with:
-          name: AzureOpenAIDemo.Web
+          name: LearningDictionary5.Web
           path: ${{ github.workspace }}/web
 
   ################################################################
@@ -206,11 +205,8 @@ jobs:
          echo 'output_appInsightsName: ${{ needs.deploy_infrastructure.outputs.output_appInsightsName }}'
          echo 'output_functionAppName: ${{ needs.deploy_infrastructure.outputs.output_functionAppName }}'
          echo 'output_apiServiceName: ${{ needs.deploy_infrastructure.outputs.output_apiServiceName }}'
-         echo 'output_apimSubscriptionKey: ${{ needs.deploy_infrastructure.outputs.output_apimSubscriptionKey }}'
-         echo 'output_OpenAIKeyValue: ${{ needs.deploy_infrastructure.outputs.output_OpenAIKeyValue }}'
          echo 'output_appInsightsApplicationId: = ${{ needs.deploy_infrastructure.outputs.output_appInsightsApplicationId }}'
          echo 'output_appInsightsAPIApplicationId: = ${{ needs.deploy_infrastructure.outputs.output_appInsightsAPIApplicationId }}'
-#         echo 'output_out_AzureOpenAIKeyValue: = ${{ needs.deploy_infrastructure.outputs.output_AzureOpenAIKeyValue }}'
          
     # Unlock Resource Group
     - name: Ensure Resource Group is UnLocked
@@ -224,14 +220,14 @@ jobs:
       uses: actions/download-artifact@v2
       continue-on-error: false
       with:
-        name: AzureOpenAIDemo.Web
-        path: ${{ github.workspace }}/AzureOpenAIDemo.Web
+        name: LearningDictionary5.Web
+        path: ${{ github.workspace }}/LearningDictionary5.Web
 
     - name: 'Deploy Website Application'
       uses: azure/webapps-deploy@v2
       with:
           app-name: ${{ needs.deploy_infrastructure.outputs.output_webSiteName }}
-          package: './AzureOpenAIDemo.Web'
+          package: './ALearningDictionary5.Web'
 
     # Lock Resource Group
     - name: Ensure Resource Group is Locked
