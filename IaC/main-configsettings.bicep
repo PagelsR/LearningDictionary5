@@ -149,7 +149,7 @@ resource webSiteAppSettingsStrings 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
   parent: existing_appService
   properties: {
-    'ConnectionStrings:MercuryHealthWebContext': '@Microsoft.KeyVault(VaultName=${keyvaultName};SecretName=${kvValue_ConnectionStringName})'
+    'ConnectionStrings:MyDbContextContext': '@Microsoft.KeyVault(VaultName=${keyvaultName};SecretName=${kvValue_ConnectionStringName})'
     DeployedEnvironment: Deployed_Environment
     WEBSITE_RUN_FROM_PACKAGE: '1'
     WEBSITE_SENTINEL: '1'

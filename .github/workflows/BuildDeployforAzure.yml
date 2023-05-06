@@ -1,4 +1,4 @@
-name: Build Deploy Demo for OpenAI
+name: Build Deploy Demo for Learning Dictionary
 on:
   push:
     branches:
